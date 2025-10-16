@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">VigourMe</string>
+    
+    <string name="facebook_app_id">353209447639288</string>
+    <string name="fb_login_protocol_scheme">fb1234</string>
+    <string name="facebook_client_token">fe0c128962f5616ebb8a17df37bffdc2</string>
+</resources>

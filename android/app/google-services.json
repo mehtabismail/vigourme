@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "298167287005",
+    "project_id": "consultancy-cf28b",
+    "storage_bucket": "consultancy-cf28b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:298167287005:android:63032c59463c3cf7746f34",
+        "android_client_info": {
+          "package_name": "com.vigourmeconsultancy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "298167287005-0sqkrsv3kvh5pna00insvrsfj7a9djql.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vigourmeconsultancy",
+            "certificate_hash": "9e2548cfcbaab29ab03c968a93701d88e0612cdd"
+          }
+        },
+        {
+          "client_id": "298167287005-20np0b2p4mcagq6v492mi0oo7v70ufhl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vigourmeconsultancy",
+            "certificate_hash": "897f80b26991f76aae07d5e8ac7a9d81098b2370"
+          }
+        },
+        {
+          "client_id": "298167287005-4ea4odeoadsj98ml779lhdu6i2reg35k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vigourmeconsultancy",
+            "certificate_hash": "a6e322e5f3697235ff7ba9f4b8c13764791684a3"
+          }
+        },
+        {
+          "client_id": "298167287005-ad9iujiusc3oc9ji8ninm6fi7gpqb3d9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vigourmeconsultancy",
+            "certificate_hash": "71c9566ad7349c468c236a159f00cd100dc79267"
+          }
+        },
+        {
+          "client_id": "298167287005-te7a1grjj7ld2uurpatj33jo7o97n14n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vigourmeconsultancy",
+            "certificate_hash": "bb601fa88f6cdb20ce9027562be69f76ce4f10a2"
+          }
+        },
+        {
+          "client_id": "298167287005-ql3qssrresn6blromme4bamgd36ed4ia.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiXnm9fDdE9JLmKQ5xErBHt8yHS2zpFPQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "298167287005-i7j62oiktmtbstf6mih7eesm55bdc6mt.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "298167287005-l97o9a7164ctva71vqq1h80d4ts2o1te.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.optimusfox.vigourme"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
