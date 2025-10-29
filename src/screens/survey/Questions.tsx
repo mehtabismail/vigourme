@@ -29,6 +29,7 @@ import {
 import { removeItemFromAnswer } from "../../redux/slices/surveyAnswerSlice";
 import navigationStrings from "../../common/navigationStrings";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackActions } from "@react-navigation/native";
 
 const Questions = (props: any) => {
   const states: any = useGetReduxState();
@@ -85,7 +86,7 @@ const Questions = (props: any) => {
   };
 
   const closeSurvey = (arg: any) => {
-    navigation.navigate(navigationStrings.SURVEY_INTRO);
+    navigation.dispatch(StackActions.popToTop());
     // arg.setDescriptiveAnswer("");
     // arg.setSelectedOption("");
     dispatch(setCurrentQuestion(0));
