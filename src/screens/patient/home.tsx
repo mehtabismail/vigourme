@@ -1,6 +1,5 @@
 import {
   View,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -32,6 +31,7 @@ import firestore from "@react-native-firebase/firestore";
 import Toast from "react-native-simple-toast";
 import FullScreenLoadingIndicator from "../../components/fullScreenLoadingIndicator";
 import { useSelector } from "react-redux";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home(props: any) {
   const [submittedSurvey, setSubmittedSurvey] = useState(null);

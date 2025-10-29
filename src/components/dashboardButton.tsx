@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   FlatList,
   StyleSheet,
   View,

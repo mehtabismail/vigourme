@@ -5,7 +5,7 @@ import { setIsLoading } from "../redux/slices/loadingSlice";
 import store from "../redux/store";
 export const HTTP_CLIENT_SUBMIT = axios.create({
   // baseURL: Config.BASE_URL,
-  baseURL: "http://46.101.210.71:6089",
+  baseURL: "http://104.248.37.217:6089",
 });
 
 // This code is used for token in headers for the protected route
@@ -24,6 +24,7 @@ HTTP_CLIENT_SUBMIT.interceptors.response.use(
     return response;
   },
   (err) => {
+    console.log("Error: HTTP_CLIENT_SUBMIT:: ", err)
     return Promise.reject(err.response.data.error);
   }
 );

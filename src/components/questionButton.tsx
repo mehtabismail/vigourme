@@ -52,12 +52,12 @@ const styles = StyleSheet.create({
   },
 
   textActive: {
-    fontSize: RFValue(16),
+    fontSize: RFValue(14),
     color: "white",
     textTransform: "capitalize",
   },
   text: {
-    fontSize: RFValue(16),
+    fontSize: RFValue(14),
     color: "#9093A3",
     textTransform: "capitalize",
   },

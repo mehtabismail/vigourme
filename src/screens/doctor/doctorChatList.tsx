@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, FlatList, StyleSheet, View, Text } from "react-native";
+import { FlatList, StyleSheet, View, Text } from "react-native";
 import Colors from "../../common/colors";
 import ChatListItem from "../../components/chatListItem";
 import Header from "../../components/header";
@@ -9,6 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import navigationStrings from "../../common/navigationStrings";
 import LoadingIndicator from "../../components/loadingIndicator";
 import moment from "moment";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DoctorChatList = (props: any) => {
   const [chatList, setChatList] = useState([]);

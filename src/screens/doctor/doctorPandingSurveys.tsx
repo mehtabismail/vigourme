@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, FlatList, StyleSheet, View, Text } from "react-native";
+import { FlatList, StyleSheet, View, Text } from "react-native";
 import Colors from "../../common/colors";
 import PandingSurveysListItem from "../../components/pandingSurveysListItem";
 import Header from "../../components/header";
@@ -8,6 +8,7 @@ import firestore from "@react-native-firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import navigationStrings from "../../common/navigationStrings";
 import LoadingIndicator from "../../components/loadingIndicator";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DoctorPandingSurveys = (props: any) => {
   const [chatList, setChatList] = useState([]);

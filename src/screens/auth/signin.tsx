@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
   Text,
   StyleSheet,
   ScrollView,
@@ -26,6 +25,7 @@ import BlurViewCommon from "../../components/BlurViewCommon";
 import Toast from "react-native-simple-toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RFValue } from "react-native-responsive-fontsize";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Redux state
 import { setRole } from "../../redux/slices/authSlice";

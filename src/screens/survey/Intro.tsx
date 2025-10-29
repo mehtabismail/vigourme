@@ -1,4 +1,4 @@
-import { View, SafeAreaView, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import React, { useState, useEffect } from "react";
 import Header from "../../components/header";
 import SurveyIntroCard from "./surveyIntroCard";
@@ -9,6 +9,7 @@ import {
 import navigationStrings from "../../common/navigationStrings";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import firestore from "@react-native-firebase/firestore";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Intro(props: any) {
   const { navigation } = props;

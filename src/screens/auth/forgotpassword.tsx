@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   Text,
   StyleSheet,
   ScrollView,
@@ -25,6 +24,7 @@ import RemoveItemFromAsyncStorage from "../../utils/removeAsyncStorageItems";
 import { useDispatch } from "react-redux";
 import { setRole } from "../../redux/slices/authSlice";
 import { setToken } from "../../redux/slices/tokenSlice";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ForgotPassword = (props: any) => {
   const dispatch = useDispatch();

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   View,
   FlatList,
@@ -38,6 +37,7 @@ import BackArrow from "../../assets/icons/backArrowDark.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { latestPrescription } from "../../redux/slices/medicineSlice";
 import InfoIcon from "../../assets/icons/info_ride_details.svg";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Chat = (props: any) => {
   const { isKeyboardVisible, keyboardHeight } = useDetectKeyBoard();

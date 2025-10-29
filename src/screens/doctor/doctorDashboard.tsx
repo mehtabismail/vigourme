@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   FlatList,
   StyleSheet,
   View,
@@ -18,6 +17,7 @@ import User from "../../assets/icons/user-bg-green.svg";
 import Message from "../../assets/icons/message-bg-green.svg";
 import navigationStrings from "../../common/navigationStrings";
 import Toast from "react-native-simple-toast";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DoctorDashboard = (props: any) => {
   const { navigation } = props;

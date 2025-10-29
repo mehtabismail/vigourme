@@ -1,5 +1,4 @@
 import {
-  SafeAreaView,
   StyleSheet,
   Text,
   View,
@@ -10,6 +9,7 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from "react-native-responsive-screen";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import SurveyHeader from "../../components/surveyHeader";
 import ProgressBar from "../../components/progressBar";

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   Text,
   StyleSheet,
   ScrollView,
@@ -34,6 +33,7 @@ import { getFcmToken } from '../../utils/NotificationService';
 import { sendFcmToFirestore } from '../../utils/fcmApi';
 import { setRole } from '../../redux/slices/authSlice';
 import { CommonActions } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Signup = (props: any) => {
   const { navigation, route } = props;
@@ -170,9 +170,14 @@ const Signup = (props: any) => {
         'post',
         !!userCredentails.googleLogin ? formData : userCredentails,
       );
-
+      
+      console.log('calling funcrtion', {
+        token: response?.data?.token,
+        userId: response?.data?.userId,
+        serialNumber: response?.data?.users?.serialNumber,
+      }, response);
       // fetch(
-      //   `http://46.101.210.71:6089${
+      //   `http://104.248.37.217:6089${
       //     !!userCredentails.googleLogin
       //       ? EndPoint.SOCIAL_SIGNUP
       //       : EndPoint.PATIENT_SIGN_UP
@@ -189,11 +194,6 @@ const Signup = (props: any) => {
       AsyncStorage.setItem('userId', data?.userId);
       console.log(status, 'checking status');
       if (status == 200) {
-        console.log('calling funcrtion', {
-          token: data?.token,
-          userId: data?.userId,
-          serialNumber: data?.users?.serialNumber,
-        });
 
         setSignedUpData(data);
         console.log(route?.params, 'checking params ');

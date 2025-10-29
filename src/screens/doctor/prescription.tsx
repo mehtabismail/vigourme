@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
-  SafeAreaView,
   Text,
   StyleSheet,
   ScrollView,
@@ -29,6 +28,7 @@ import { debounce } from "lodash";
 import Cross from "../../assets/icons/cross.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { selectedMedicinesList } from "../../redux/slices/medicineSlice";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Prescription = (props: any) => {
   const { navigation, route } = props;

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  SafeAreaView,
   View,
   StyleSheet,
   Text,
@@ -44,6 +43,7 @@ import VersionCheck from 'react-native-version-check';
 import { apiRequest } from '../../api/apiRequest';
 import EndPoint from '../../common/apiEndpoints';
 import { sendNotification } from '../../utils/fcmApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Splash = () => {
   const dispatch = useDispatch();

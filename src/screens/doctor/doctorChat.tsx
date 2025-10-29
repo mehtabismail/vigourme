@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   View,
   FlatList,
@@ -26,6 +25,7 @@ import useDetectKeyBoard from "../../hooks/useDetectKeyboard";
 import DownloadSurveyInPDF from "../../utils/downloadSurvey";
 import { getReceiverFcmToken, sendNotification } from "../../utils/fcmApi";
 import downloadLatestPrescriptionPDF from "../../utils/downloadPrescription";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DoctorChat = (props: any) => {
   const { isKeyboardVisible, keyboardHeight } = useDetectKeyBoard();

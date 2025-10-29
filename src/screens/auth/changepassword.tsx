@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   Text,
   StyleSheet,
   ScrollView,
@@ -21,6 +20,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { apiRequest } from "../../api/apiRequest";
 import EndPoint from "../../common/apiEndpoints";
 import Toast from "react-native-simple-toast";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ChangePassword = (props: any) => {
   const { navigation } = props;

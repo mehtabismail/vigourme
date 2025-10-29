@@ -1,4 +1,4 @@
-import { SafeAreaView, FlatList, StyleSheet, View, Text } from "react-native";
+import { FlatList, StyleSheet, View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import Colors from "../../common/colors";
 import ChatListItem from "../../components/chatListItem";
@@ -11,6 +11,7 @@ import User from "../../assets/icons/user-bg-green.svg";
 import Message from "../../assets/icons/message-bg-green.svg";
 import navigationStrings from "../../common/navigationStrings";
 import PandingSurveysListItem from "../../components/pandingSurveysListItem";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const DoctorPandingSurveyDetail = (props: any) => {
   const {navigation } = props;
