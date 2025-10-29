@@ -46,6 +46,14 @@
           }
         },
         {
+          "client_id": "298167287005-quqn1rbhou92ce7n7g59jvugjtqg7m52.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vigourmeconsultancy",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "298167287005-te7a1grjj7ld2uurpatj33jo7o97n14n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

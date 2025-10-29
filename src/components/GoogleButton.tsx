@@ -1,21 +1,21 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import React from "react";
-import GmailSVG from "../assets/icons/gmail.svg";
-import { RFValue } from "react-native-responsive-fontsize";
-import { config } from "../common";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { apiRequest } from "../api/apiRequest";
-import EndPoint from "../common/apiEndpoints";
-import Toast from "react-native-simple-toast";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getFcmToken } from "../utils/NotificationService";
-import { sendFcmToFirestore } from "../utils/fcmApi";
-import { setToken } from "../redux/slices/tokenSlice";
-import { setRole } from "../redux/slices/authSlice";
-import { useDispatch } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import navigationStrings from "../common/navigationStrings";
-import { CommonActions } from "@react-navigation/native";
+import { View, Text, TouchableOpacity } from 'react-native';
+import React from 'react';
+import GmailSVG from '../assets/icons/gmail.svg';
+import { RFValue } from 'react-native-responsive-fontsize';
+import { config } from '../common';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { apiRequest } from '../api/apiRequest';
+import EndPoint from '../common/apiEndpoints';
+import Toast from 'react-native-simple-toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFcmToken } from '../utils/NotificationService';
+import { sendFcmToFirestore } from '../utils/fcmApi';
+import { setToken } from '../redux/slices/tokenSlice';
+import { setRole } from '../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
+import navigationStrings from '../common/navigationStrings';
+import { CommonActions } from '@react-navigation/native';
 
 type Props = {
   text: string;
@@ -40,81 +40,82 @@ const GoogleButton: FC<Props> = (props: Props) => {
       } as any);
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
+
       await GoogleSignin.revokeAccess();
-      if (userInfo) {
-        if (text == "Sign in") {
+      if (userInfo?.type == 'success') {
+        if (text == 'Sign in') {
           try {
             const userCredentails = {
-              email: userInfo?.user?.email,
+              email: userInfo?.data?.user?.email,
               facebookLogin: false,
               googleLogin: true,
             };
             const { data }: any = await apiRequest(
               EndPoint.SOCIAL_LOGIN,
-              "post",
-              userCredentails
+              'post',
+              userCredentails,
             );
 
             if (data?.success) {
-              await AsyncStorage.setItem("token", data.token);
-              await AsyncStorage.setItem("userId", data.user.id);
-              await AsyncStorage.setItem("doctorId", data.doctorId);
-              await AsyncStorage.setItem("name", data.user.name);
-              (await AsyncStorage.getItem("showOneTimeToast")) === null &&
-                (await AsyncStorage.setItem("showOneTimeToast", "true"));
+              await AsyncStorage.setItem('token', data.token);
+              await AsyncStorage.setItem('userId', data.user.id);
+              await AsyncStorage.setItem('doctorId', data.doctorId);
+              await AsyncStorage.setItem('name', data.user.name);
+              (await AsyncStorage.getItem('showOneTimeToast')) === null &&
+                (await AsyncStorage.setItem('showOneTimeToast', 'true'));
               data?.user?.serialNumber &&
                 (await AsyncStorage.setItem(
-                  "serialNumber",
-                  data?.user?.serialNumber
+                  'serialNumber',
+                  data?.user?.serialNumber,
                 ));
 
-              await AsyncStorage.setItem("userEmail", "");
-              await AsyncStorage.setItem("userPassword", "");
+              await AsyncStorage.setItem('userEmail', '');
+              await AsyncStorage.setItem('userPassword', '');
 
               // add fcm token in users collection
               const fcmToken = await getFcmToken();
               fcmToken
                 ? sendFcmToFirestore(
                     fcmToken,
-                    data?.user?.isConsultant ? data.doctorId : data.user.id
+                    data?.user?.isConsultant ? data.doctorId : data.user.id,
                   )
-                : console.log("FCM Token Error: ", fcmToken);
+                : console.log('FCM Token Error: ', fcmToken);
 
               setBlurView(false);
               dispatch(setToken(data.token));
               if (data?.user?.isConsultant) {
-                dispatch(setRole("consultant"));
-                await AsyncStorage.setItem("role", "consultant");
+                dispatch(setRole('consultant'));
+                await AsyncStorage.setItem('role', 'consultant');
                 navigation.dispatch(
                   CommonActions.reset({
                     index: 1,
                     routes: [{ name: navigationStrings.DOCTORS_NAVIGATOR }],
-                  })
+                  }),
                 );
               } else {
-                dispatch(setRole("patient"));
-                await AsyncStorage.setItem("role", "patient");
+                dispatch(setRole('patient'));
+                await AsyncStorage.setItem('role', 'patient');
                 navigation.dispatch(
                   CommonActions.reset({
                     index: 1,
                     routes: [{ name: navigationStrings.PATIENT_NAVIGATOR }],
-                  })
+                  }),
                 );
               }
             } else {
               data.message && Toast.show(data.message.toString());
-              console.log("\n\n: , ", data);
+              console.log('\n\n: , ', data);
             }
           } catch (error: any) {
             Toast.show(error.toString());
           }
         } else {
-          setGoogleDetails(userInfo);
+          setGoogleDetails(userInfo?.data);
         }
       }
       await GoogleSignin.revokeAccess();
     } catch (error) {
-      console.log("error in catch ======>", error);
+      console.log('error in catch ======>', error);
     }
   };
 
@@ -124,13 +125,13 @@ const GoogleButton: FC<Props> = (props: Props) => {
       style={[
         {
           borderWidth: 1,
-          borderColor: "grey",
+          borderColor: 'grey',
           borderRadius: 10,
           height: 60,
-          alignItems: "center",
-          flexDirection: "row",
-          backgroundColor: "white",
-          justifyContent: "center",
+          alignItems: 'center',
+          flexDirection: 'row',
+          backgroundColor: 'white',
+          justifyContent: 'center',
         },
       ]}
     >
@@ -142,13 +143,13 @@ const GoogleButton: FC<Props> = (props: Props) => {
           style={[
             {
               fontSize: RFValue(16),
-              color: "black",
-              fontWeight: "bold",
-              textAlign: "center",
+              color: 'black',
+              fontWeight: 'bold',
+              textAlign: 'center',
             },
           ]}
         >
-          {props?.text + " with Google"}
+          {props?.text + ' with Google'}
         </Text>
       </View>
     </TouchableOpacity>

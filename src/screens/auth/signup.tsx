@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   Text,
@@ -9,47 +9,47 @@ import {
   Dimensions,
   ImageBackground,
   Alert,
-} from "react-native";
-import Colors from "../../common/colors";
-import StatusBarComponent from "../../components/statusbar";
-import Header from "../../components/header";
-import HeadingWithTitle from "../../components/headingWithTitle";
-import Input from "../../components/Inputs";
-import Button from "../../components/button";
-import navigationStrings from "../../common/navigationStrings";
-import GenderDropdown from "../../components/genderDropdown";
-import DatePicker from "react-native-date-picker";
-import { getReadableDate } from "../../utils/DatePraser";
-import { RFValue } from "react-native-responsive-fontsize";
-import BlurViewCommon from "../../components/BlurViewCommon";
-import { apiRequest } from "../../api/apiRequest";
-import EndPoint from "../../common/apiEndpoints";
-import Config from "react-native-config";
-import Toast from "react-native-simple-toast";
-import GoogleButton from "../../components/GoogleButton";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch } from "react-redux";
-import { setToken } from "../../redux/slices/tokenSlice";
-import { getFcmToken } from "../../utils/NotificationService";
-import { sendFcmToFirestore } from "../../utils/fcmApi";
-import { setRole } from "../../redux/slices/authSlice";
-import { CommonActions } from "@react-navigation/native";
+} from 'react-native';
+import Colors from '../../common/colors';
+import StatusBarComponent from '../../components/statusbar';
+import Header from '../../components/header';
+import HeadingWithTitle from '../../components/headingWithTitle';
+import Input from '../../components/Inputs';
+import Button from '../../components/button';
+import navigationStrings from '../../common/navigationStrings';
+import GenderDropdown from '../../components/genderDropdown';
+import DatePicker from 'react-native-date-picker';
+import { getReadableDate } from '../../utils/DatePraser';
+import { RFValue } from 'react-native-responsive-fontsize';
+import BlurViewCommon from '../../components/BlurViewCommon';
+import { apiRequest } from '../../api/apiRequest';
+import EndPoint from '../../common/apiEndpoints';
+import Config from 'react-native-config';
+import Toast from 'react-native-simple-toast';
+import GoogleButton from '../../components/GoogleButton';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../../redux/slices/tokenSlice';
+import { getFcmToken } from '../../utils/NotificationService';
+import { sendFcmToFirestore } from '../../utils/fcmApi';
+import { setRole } from '../../redux/slices/authSlice';
+import { CommonActions } from '@react-navigation/native';
 
 const Signup = (props: any) => {
   const { navigation, route } = props;
   const [genderDropdownVisibility, setGenderDropdownVisibility] =
     useState(false);
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [blurView, setBlurView] = useState(true);
   const [userCredentails, setUserCredentials] = useState({
-    name: "",
-    email: "",
-    gender: "",
-    dob: "",
-    phoneNumber: "",
-    password: "",
+    name: '',
+    email: '',
+    gender: '',
+    dob: '',
+    phoneNumber: '',
+    password: '',
   });
   const [googleCredentials, setGoogleCredentials] = useState({
     facebookLogin: false,
@@ -67,14 +67,14 @@ const Signup = (props: any) => {
   };
 
   const handleChangeInput = (value: any, name: String) => {
-    setUserCredentials((prev) => ({
+    setUserCredentials(prev => ({
       ...prev,
-      [`${name}`]: name == "dob" ? value : value,
+      [`${name}`]: name == 'dob' ? value : value,
     }));
   };
 
   const googleSignUpProceed = () => {
-    console.log("google signup proceeds");
+    console.log('google signup proceeds');
     setUserCredentials({
       ...userCredentails,
       name: googleDetails?.user?.name,
@@ -91,57 +91,58 @@ const Signup = (props: any) => {
       password: userCredentails?.password,
     };
     try {
-      const { data }: any = await apiRequest(EndPoint.SIGN_IN, "post", reqObj);
+      const { data }: any = await apiRequest(EndPoint.SIGN_IN, 'post', reqObj);
 
       if (data?.success) {
-        await AsyncStorage.setItem("token", data.token);
-        await AsyncStorage.setItem("userId", data.user.id);
-        await AsyncStorage.setItem("doctorId", data.doctorId);
-        await AsyncStorage.setItem("name", data.user.name);
-        (await AsyncStorage.getItem("showOneTimeToast")) === null &&
-          (await AsyncStorage.setItem("showOneTimeToast", "true"));
+        await AsyncStorage.setItem('token', data.token);
+        await AsyncStorage.setItem('userId', data.user.id);
+        await AsyncStorage.setItem('doctorId', data.doctorId);
+        await AsyncStorage.setItem('name', data.user.name);
+        (await AsyncStorage.getItem('showOneTimeToast')) === null &&
+          (await AsyncStorage.setItem('showOneTimeToast', 'true'));
         data?.user?.serialNumber &&
           (await AsyncStorage.setItem(
-            "serialNumber",
-            data?.user?.serialNumber
+            'serialNumber',
+            data?.user?.serialNumber,
           ));
 
-        await AsyncStorage.setItem("userEmail", "");
-        await AsyncStorage.setItem("userPassword", "");
+        await AsyncStorage.setItem('userEmail', '');
+        await AsyncStorage.setItem('userPassword', '');
 
         // add fcm token in users collection
         const fcmToken = await getFcmToken();
         fcmToken
           ? sendFcmToFirestore(
               fcmToken,
-              data?.user?.isConsultant ? data.doctorId : data.user.id
+              data?.user?.isConsultant ? data.doctorId : data.user.id,
             )
-          : console.log("FCM Token Error: ", fcmToken);
+          : console.log('FCM Token Error: ', fcmToken);
 
         setBlurView(false);
         dispatch(setToken(data.token));
         if (data?.user?.isConsultant) {
-          dispatch(setRole("consultant"));
-          await AsyncStorage.setItem("role", "consultant");
+          console.log(data?.user, 'checking consultant');
+          dispatch(setRole('consultant'));
+          await AsyncStorage.setItem('role', 'consultant');
           navigation.dispatch(
             CommonActions.reset({
               index: 1,
               routes: [{ name: navigationStrings.DOCTORS_NAVIGATOR }],
-            })
+            }),
           );
         } else {
-          dispatch(setRole("patient"));
-          await AsyncStorage.setItem("role", "patient");
+          dispatch(setRole('patient'));
+          await AsyncStorage.setItem('role', 'patient');
           navigation.dispatch(
             CommonActions.reset({
               index: 1,
               routes: [{ name: navigationStrings.PATIENT_NAVIGATOR }],
-            })
+            }),
           );
         }
       } else {
         data.message && Toast.show(data.message.toString());
-        console.log("\n\n: , ", data);
+        console.log('\n\n: , ', data);
       }
     } catch (error: any) {
       Toast.show(error.toString());
@@ -149,8 +150,8 @@ const Signup = (props: any) => {
   };
 
   const signup = async () => {
-    const selected_gender = await AsyncStorage.getItem("gender");
-
+    const selected_gender = await AsyncStorage.getItem('gender');
+    console.log('proceeding');
     try {
       let formData = {
         name: userCredentails.name,
@@ -166,8 +167,8 @@ const Signup = (props: any) => {
         !!userCredentails.googleLogin
           ? EndPoint.SOCIAL_SIGNUP
           : EndPoint.PATIENT_SIGN_UP,
-        "post",
-        !!userCredentails.googleLogin ? formData : userCredentails
+        'post',
+        !!userCredentails.googleLogin ? formData : userCredentails,
       );
 
       // fetch(
@@ -185,16 +186,17 @@ const Signup = (props: any) => {
       // ).then((res) => console.log(res, "api response of sign up"));
       dispatch(setToken(response?.data?.token));
       const { data, status } = response;
-      AsyncStorage.setItem("userId", data?.userId);
-
+      AsyncStorage.setItem('userId', data?.userId);
+      console.log(status, 'checking status');
       if (status == 200) {
-        console.log("calling funcrtion", {
+        console.log('calling funcrtion', {
           token: data?.token,
           userId: data?.userId,
           serialNumber: data?.users?.serialNumber,
         });
 
         setSignedUpData(data);
+        console.log(route?.params, 'checking params ');
         route?.params?.submitSurveyCallback({
           token: data?.token,
           userId: data?.userId,
@@ -214,9 +216,9 @@ const Signup = (props: any) => {
   };
 
   const successSignUpModal = async () => {
-    Alert.alert("Thanks for Signing Up!", "", [
+    Alert.alert('Thanks for Signing Up!', '', [
       {
-        text: "Sign In",
+        text: 'Sign In',
         onPress: () => {
           signin();
         },
@@ -236,7 +238,7 @@ const Signup = (props: any) => {
     return (
       <Text style={styles.headingText}>
         Enter your
-        <Text style={{ fontWeight: "bold" }}> email and password </Text>to sign
+        <Text style={{ fontWeight: 'bold' }}> email and password </Text>to sign
         up to your account.
       </Text>
     );
@@ -247,9 +249,9 @@ const Signup = (props: any) => {
       <StatusBarComponent />
       <Header backPress={goBack} showLogo />
       <ImageBackground
-        resizeMode='cover'
+        resizeMode="cover"
         style={styles.containerImage}
-        source={require("../../assets/images/physician--with-stethoscope.png")}
+        source={require('../../assets/images/physician--with-stethoscope.png')}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -260,23 +262,23 @@ const Signup = (props: any) => {
 
             <View style={{ zIndex: 2 }}>
               <HeadingWithTitle
-                screen='signup'
+                screen="signup"
                 marginTop={40}
                 marginBottom={20}
-                title={"Sign up"}
+                title={'Sign up'}
                 UnderHeadingText={<UnderHeadingText />}
               />
               <Input
-                title={"Name"}
-                placeholder={"e.g Dani Roy"}
-                name='name'
+                title={'Name'}
+                placeholder={'e.g Dani Roy'}
+                name="name"
                 value={userCredentails?.name}
                 onChangeText={handleChangeInput}
               />
               <Input
-                title={"Email"}
-                placeholder={"e.g email@email.com"}
-                name='email'
+                title={'Email'}
+                placeholder={'e.g email@email.com'}
+                name="email"
                 value={userCredentails.email}
                 onChangeText={handleChangeInput}
               />
@@ -341,11 +343,11 @@ const Signup = (props: any) => {
               /> */}
               {!userCredentails.googleLogin && (
                 <Input
-                  title={"Password"}
-                  placeholder={"......."}
+                  title={'Password'}
+                  placeholder={'.......'}
                   secureTextEntry={true}
                   value={userCredentails.password}
-                  name='password'
+                  name="password"
                   onChangeText={handleChangeInput}
                 />
               )}
@@ -354,17 +356,17 @@ const Signup = (props: any) => {
                 onPress={signup}
                 title={
                   userCredentails.googleLogin
-                    ? "Signing up with google"
-                    : "Sign Up"
+                    ? 'Signing up with google'
+                    : 'Sign Up'
                 }
               />
             </View>
-            <View style={{ marginVertical: 15, alignItems: "center" }}>
+            <View style={{ marginVertical: 15, alignItems: 'center' }}>
               <Text style={styles.text}>Or sign up via</Text>
             </View>
             <View>
               <GoogleButton
-                text='Sign up'
+                text="Sign up"
                 setGoogleDetails={setGoogleDetails}
               />
             </View>
@@ -375,7 +377,7 @@ const Signup = (props: any) => {
           <View style={styles.bottomView}>
             <Text style={styles.bottomText}>Already have an account?</Text>
             <TouchableOpacity
-              style={{ alignItems: "center" }}
+              style={{ alignItems: 'center' }}
               onPress={navigateToSignin}
             >
               <Text style={styles.signUptext}>Sign in</Text>
@@ -394,20 +396,20 @@ const styles = StyleSheet.create({
   },
   containerImage: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
 
-    height: Dimensions.get("window").height,
+    height: Dimensions.get('window').height,
   },
   bottomView: {
-    width: "90%",
-    alignSelf: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
+    width: '90%',
+    alignSelf: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
     marginBottom: 20,
   },
   bottomText: {
-    textAlign: "center",
+    textAlign: 'center',
     color: Colors.WHITE,
     fontSize: 17,
   },
@@ -415,22 +417,22 @@ const styles = StyleSheet.create({
     zIndex: 1,
     paddingHorizontal: 20,
     borderRadius: 10,
-    overflow: "hidden",
+    overflow: 'hidden',
     // paddingVertical: '10%',
-    paddingBottom: "7%",
-    marginVertical: "15%",
+    paddingBottom: '7%',
+    marginVertical: '15%',
   },
   signUptext: {
     color: Colors.WHITE,
     fontSize: 14,
-    fontWeight: "500",
+    fontWeight: '500',
     marginLeft: 3,
   },
 
   headingText: {
     color: Colors.WHITE,
     fontSize: RFValue(14),
-    fontWeight: "400",
+    fontWeight: '400',
     marginTop: 15,
     lineHeight: 22,
   },
