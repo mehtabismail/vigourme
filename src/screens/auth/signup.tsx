@@ -34,6 +34,7 @@ import { sendFcmToFirestore } from '../../utils/fcmApi';
 import { setRole } from '../../redux/slices/authSlice';
 import { CommonActions } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FullScreenLoadingIndicator from '../../components/fullScreenLoadingIndicator';
 
 const Signup = (props: any) => {
   const { navigation, route } = props;
@@ -42,6 +43,7 @@ const Signup = (props: any) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [blurView, setBlurView] = useState(true);
   const [userCredentails, setUserCredentials] = useState({
     name: '',
@@ -73,9 +75,17 @@ const Signup = (props: any) => {
     }));
   };
 
-  const googleSignUpProceed = () => {
+  const googleSignUpProceed = async () => {
     console.log('google signup proceeds');
     setUserCredentials({
+      ...userCredentails,
+      name: googleDetails?.user?.name,
+      email: googleDetails?.user?.email,
+      facebookLogin: false,
+      googleLogin: true,
+    });
+
+    await signup({
       ...userCredentails,
       name: googleDetails?.user?.name,
       email: googleDetails?.user?.email,
@@ -85,7 +95,7 @@ const Signup = (props: any) => {
   };
   const dispatch = useDispatch();
 
-  const signin = async () => {
+    const signin = async () => {
     const reqObj = {
       email: userCredentails?.email,
       password: userCredentails?.password,
@@ -148,14 +158,18 @@ const Signup = (props: any) => {
       Toast.show(error.toString());
     }
   };
-
-  const signup = async () => {
+  
+  const signup = async (_userCredentails: any) => {
+    const localUserCredentails = _userCredentails?.googleLogin
+      ? _userCredentails
+      : userCredentails;
     const selected_gender = await AsyncStorage.getItem('gender');
     console.log('proceeding');
+    setIsLoading(true);
     try {
       let formData = {
-        name: userCredentails.name,
-        email: userCredentails.email,
+        name: localUserCredentails.name,
+        email: localUserCredentails.email,
         gender: selected_gender,
         // dob: userCredentails.dob,
         // phoneNumber: userCredentails.phoneNumber,
@@ -164,54 +178,44 @@ const Signup = (props: any) => {
       };
 
       const response: any = await apiRequest(
-        !!userCredentails.googleLogin
+        !!localUserCredentails.googleLogin
           ? EndPoint.SOCIAL_SIGNUP
           : EndPoint.PATIENT_SIGN_UP,
         'post',
-        !!userCredentails.googleLogin ? formData : userCredentails,
+        !!localUserCredentails.googleLogin ? formData : localUserCredentails,
       );
-      
-      console.log('calling funcrtion', {
-        token: response?.data?.token,
-        userId: response?.data?.userId,
-        serialNumber: response?.data?.users?.serialNumber,
-      }, response);
-      // fetch(
-      //   `http://104.248.37.217:6089${
-      //     !!userCredentails.googleLogin
-      //       ? EndPoint.SOCIAL_SIGNUP
-      //       : EndPoint.PATIENT_SIGN_UP
-      //   }`,
-      //   {
-      //     method: "POST",
-      //     body: JSON.stringify(
-      //       !!userCredentails.googleLogin ? formData : userCredentails
-      //     ),
-      //   }
-      // ).then((res) => console.log(res, "api response of sign up"));
+
+      console.log(
+        'calling funcrtion',
+        {
+          token: response?.data?.token,
+          userId: response?.data?.userId,
+          serialNumber: response?.data?.users?.serialNumber,
+        },
+        response,
+      );
       dispatch(setToken(response?.data?.token));
       const { data, status } = response;
-      AsyncStorage.setItem('userId', data?.userId);
+      await AsyncStorage.setItem('userId', data?.userId);
       console.log(status, 'checking status');
       if (status == 200) {
-
         setSignedUpData(data);
         console.log(route?.params, 'checking params ');
-        route?.params?.submitSurveyCallback({
+        await route?.params?.submitSurveyCallback({
           token: data?.token,
           userId: data?.userId,
           serialNumber: data?.users?.serialNumber,
         });
         successSignUpModal();
-        // signin(data);
       }
 
       Toast.show(data.message);
-      setBlurView(false);
-      // navigateToSignin();
     } catch (error: any) {
       console.log(error);
       Toast.show(error);
+    } finally {
+      setBlurView(false);
+      setIsLoading(false);
     }
   };
 
@@ -220,7 +224,7 @@ const Signup = (props: any) => {
       {
         text: 'Sign In',
         onPress: () => {
-          signin();
+          navigation.replace(navigationStrings.SIGN_IN);
         },
       },
     ]);
@@ -244,7 +248,9 @@ const Signup = (props: any) => {
     );
   };
 
-  return (
+  return isLoading ? (
+    <FullScreenLoadingIndicator />
+  ) : (
     <SafeAreaView style={styles.container}>
       <StatusBarComponent />
       <Header backPress={goBack} showLogo />

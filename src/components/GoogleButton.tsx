@@ -29,7 +29,6 @@ const GoogleButton: FC<Props> = (props: Props) => {
   const googleButtonHandler = async ({
     text,
     setGoogleDetails,
-    setBlurView,
   }) => {
     try {
       GoogleSignin.configure({
@@ -81,7 +80,6 @@ const GoogleButton: FC<Props> = (props: Props) => {
                   )
                 : console.log('FCM Token Error: ', fcmToken);
 
-              setBlurView(false);
               dispatch(setToken(data.token));
               if (data?.user?.isConsultant) {
                 dispatch(setRole('consultant'));
