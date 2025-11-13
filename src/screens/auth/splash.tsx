@@ -108,7 +108,7 @@ const Splash = () => {
     let tokenVal = await AsyncStorage.getItem('token');
     let role = await AsyncStorage.getItem('role');
     if (!tokenVal) {
-      navigation.replace(navigationStrings.SIGN_IN);
+      navigation.navigate(navigationStrings.SIGN_IN);
     } else {
       dispatch(setToken(tokenVal));
       if (role == 'patient') {
@@ -129,7 +129,7 @@ const Splash = () => {
           title: 'New Prescription',
         },
       },
-      () => {},
+      () => { },
     );
     // seedingQuestionaire("common", commonQuestion);
     // seedingQuestionaire("femaleCommonQuestion", femaleCommonQuestion);

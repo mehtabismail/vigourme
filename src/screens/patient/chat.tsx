@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Text,
   BackHandler,
-  KeyboardAvoidingView,
   Modal,
   ScrollView,
 } from "react-native";
@@ -22,7 +21,7 @@ import SendMessageWhite from "../../assets/icons/send_message_white.svg";
 import firestore from "@react-native-firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useGetReduxState from "../../customhooks/useGetReduxState";
-import RNFetchBlob from "rn-fetch-blob";
+import RNFetchBlob from 'react-native-blob-util';
 import EndPoint from "../../common/apiEndpoints";
 import Toast from "react-native-simple-toast";
 import { apiRequest } from "../../api/apiRequest";
@@ -210,7 +209,7 @@ const Chat = (props: any) => {
       price += item?.price;
       setTotalPrice(price);
     });
-    return () => {};
+    return () => { };
   }, [orderPrescription, setOrderPrescription]);
 
   const sendMessage = async () => {
@@ -674,90 +673,6 @@ const Chat = (props: any) => {
     navigation.navigate(path);
   };
 
-  const MessageComponent = () => {
-    return (
-      <View style={{ flex: 1 }}>
-        <View style={{ marginHorizontal: 20, flex: 1 }}>
-          {!(messagesList.length > 0 || !!empityConversationText) && (
-            <FullScreenLoadingIndicator />
-          )}
-          {empityConversationText ? (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: Colors.GRAY_GARK,
-                  padding: 30,
-                  fontSize: 16,
-                  fontWeight: "500",
-                  textAlign: "center",
-                }}
-              >
-                {empityConversationText}
-              </Text>
-            </View>
-          ) : (
-            <FlatList
-              style={[styles.flatList, { zIndex: 2 }]}
-              showsVerticalScrollIndicator={false}
-              data={messagesList}
-              // key={"_"}
-              inverted={true}
-              renderItem={({ item }: any) => {
-                return (
-                  <Message
-                    isAttachment={item.isAttachment}
-                    time={item.time}
-                    sentBy={item.sentBy}
-                    messageValue={item.text}
-                    messageId={item.id}
-                    seen={item.seen}
-                  />
-                );
-              }}
-            />
-          )}
-        </View>
-
-        <View
-          style={[
-            styles.typeSendMessageContainer,
-            {
-              paddingVertical: Platform.OS == "ios" ? 18 : 3,
-            },
-          ]}
-        >
-          <TextInput
-            editable={!!!empityConversationText}
-            placeholder='Type a Message'
-            multiline={true}
-            placeholderTextColor={Colors.MESSAGE_TIME}
-            style={styles.inputStyle}
-            value={singleMessage}
-            onChangeText={(text: any) => setSingleMessage(text)}
-          />
-          <TouchableOpacity
-            disabled={!!!singleMessage}
-            onPress={sendMessage}
-            style={[
-              styles.sendMessageButton,
-              !!!singleMessage
-                ? { backgroundColor: Colors.GRAYTEXTDARK }
-                : null,
-            ]}
-          >
-            <SendMessageWhite />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
   const getLatestMedicines = async () => {
     const userId = await AsyncStorage.getItem("userId");
     console.log("passed");
@@ -782,49 +697,121 @@ const Chat = (props: any) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header filledLogo backPress={goBack} title={`Chat`} shadow />
-      {notificationVisibility ? (
-        <>
-          <View style={[styles.downloadSurveyReport]}>
-            <Text style={styles.downloadTextDesc}>
-              Click on view button to see the prescribed medicine by doctor.
-            </Text>
-            <TouchableOpacity onPress={downloadLatestPrescription}>
-              <Text style={styles.downloadText}>View</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={[styles.downloadSurveyReport]}>
-            <Text style={styles.downloadTextDesc}>
-              Order prescribed medicines
-            </Text>
-            <TouchableOpacity onPress={() => getLatestMedicines()}>
-              <Text style={styles.downloadText}>Order</Text>
-            </TouchableOpacity>
-            <Modal
-              animationType='slide'
-              transparent={true}
-              visible={modalVisible}
-              onRequestClose={() => {
-                setModalVisible(!modalVisible);
-              }}
-            >
-              {orderMedicinesModal()}
-            </Modal>
-          </View>
-        </>
-      ) : null}
+      <View style={{
+        flex: 1,
+        marginBottom: !isKeyboardVisible ? 0 : Platform.OS === "android" ? keyboardHeight + 24 : 0,
+      }}>
+        <Header filledLogo backPress={goBack} title={`Chat`} shadow />
+        {notificationVisibility ? (
+          <>
+            <View style={[styles.downloadSurveyReport]}>
+              <Text style={styles.downloadTextDesc}>
+                Click on view button to see the prescribed medicine by doctor.
+              </Text>
+              <TouchableOpacity onPress={downloadLatestPrescription}>
+                <Text style={styles.downloadText}>View</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={[styles.downloadSurveyReport]}>
+              <Text style={styles.downloadTextDesc}>
+                Order prescribed medicines
+              </Text>
+              <TouchableOpacity onPress={() => getLatestMedicines()}>
+                <Text style={styles.downloadText}>Order</Text>
+              </TouchableOpacity>
+              <Modal
+                animationType='slide'
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                  setModalVisible(!modalVisible);
+                }}
+              >
+                {orderMedicinesModal()}
+              </Modal>
+            </View>
+          </>
+        ) : null}
 
-      {Platform.OS === "ios" ? (
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          {MessageComponent()}
-        </KeyboardAvoidingView>
-      ) : (
-        MessageComponent()
-      )}
+        <View style={{ flex: 1 }}>
+          <View style={{ marginHorizontal: 20, flex: 1 }}>
+            {!(messagesList.length > 0 || !!empityConversationText) && (
+              <FullScreenLoadingIndicator />
+            )}
+            {empityConversationText ? (
+              <View
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: Colors.GRAY_GARK,
+                    padding: 30,
+                    fontSize: 16,
+                    fontWeight: "500",
+                    textAlign: "center",
+                  }}
+                >
+                  {empityConversationText}
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                style={[styles.flatList, { zIndex: 2 }]}
+                showsVerticalScrollIndicator={false}
+                data={messagesList}
+                // key={"_"}
+                inverted={true}
+                renderItem={({ item }: any) => {
+                  return (
+                    <Message
+                      isAttachment={item.isAttachment}
+                      time={item.time}
+                      sentBy={item.sentBy}
+                      messageValue={item.text}
+                      messageId={item.id}
+                      seen={item.seen}
+                    />
+                  );
+                }}
+              />
+            )}
+          </View>
+
+          <View
+            style={[
+              styles.typeSendMessageContainer,
+              {
+                paddingVertical: Platform.OS == "ios" ? 18 : 3,
+              },
+            ]}
+          >
+            <TextInput
+              editable={!!!empityConversationText}
+              placeholder='Type a Message'
+              multiline={true}
+              placeholderTextColor={Colors.MESSAGE_TIME}
+              style={styles.inputStyle}
+              value={singleMessage}
+              onChangeText={(text: any) => setSingleMessage(text)}
+            />
+            <TouchableOpacity
+              disabled={!singleMessage}
+              onPress={sendMessage}
+              style={[
+                styles.sendMessageButton,
+              ]}
+            >
+              <SendMessageWhite fill={!singleMessage ? Colors.GREYTEXT : Colors.GRAY_GARK} />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     </SafeAreaView>
+
   );
 };
 
@@ -866,15 +853,7 @@ const styles = StyleSheet.create({
   },
   sendMessageButton: {
     position: "absolute",
-    padding: 10,
-    borderRadius: 50,
-    backgroundColor: Colors.BUTTON_BG,
-    // borderRadius: 50,
-    right: 20,
-
-    // paddingRight: 4,
-    // paddingBottom: 2,
-    bottom: 10,
+    right: 15,
   },
   downloadSurveyReport: {
     width: "100%",

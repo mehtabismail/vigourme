@@ -7,7 +7,6 @@ import {
   Platform,
   TouchableOpacity,
   Text,
-  KeyboardAvoidingView,
 } from "react-native";
 import Colors from "../../common/colors";
 import Header from "../../components/header";
@@ -19,7 +18,7 @@ import firestore from "@react-native-firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { apiRequest } from "../../api/apiRequest";
 import EndPoint from "../../common/apiEndpoints";
-import RNFetchBlob from "rn-fetch-blob";
+import RNFetchBlob from 'react-native-blob-util';
 import Toast from "react-native-simple-toast";
 import useDetectKeyBoard from "../../hooks/useDetectKeyboard";
 import DownloadSurveyInPDF from "../../utils/downloadSurvey";
@@ -156,9 +155,9 @@ const DoctorChat = (props: any) => {
           docRef.set(
             _fromPandingSurveys
               ? {
-                  updatedAt: firestore.FieldValue.serverTimestamp(),
-                  seen: true,
-                }
+                updatedAt: firestore.FieldValue.serverTimestamp(),
+                seen: true,
+              }
               : { seen: true },
             { merge: true }
           );
@@ -308,9 +307,19 @@ const DoctorChat = (props: any) => {
     }
   };
 
-  const MessageComponent = () => {
-    return (
-      <View style={{ flex: 1 }}>
+  return (
+    <SafeAreaView style={styles.container} >
+      <View style={{
+        flex: 1,
+        marginBottom: !isKeyboardVisible ? 0 : Platform.OS === "android" ? keyboardHeight + 24 : 0,
+      }}>
+        <Header
+          filledLogo
+          backPress={goBack}
+          title={patientSerialNumber}
+          shadow
+        />
+
         <View style={styles.downloadSurveyReport}>
           <Text style={styles.downloadTextDesc}>
             Click on Download button to view patient questionnaire.
@@ -327,75 +336,61 @@ const DoctorChat = (props: any) => {
             <Text style={styles.downloadText}>View</Text>
           </TouchableOpacity>
         </View>
-        <View style={{ paddingHorizontal: 20, flex: 1 }}>
-          <FlatList
-            style={styles.flatList}
-            showsVerticalScrollIndicator={false}
-            data={messagesList}
-            key={"_"}
-            inverted={true}
-            renderItem={({ item }: any) => {
-              return (
-                <Message
-                  isAttachment={item.isAttachment}
-                  time={item.time}
-                  sentBy={item.sentBy}
-                  messageValue={item.text}
-                  messageId={item.id}
-                  seen={item.seen}
-                  patientSerialNumber={patientSerialNumber}
-                />
-              );
-            }}
-          />
-        </View>
-        <View style={[styles.mainBottomView]}>
-          <TouchableOpacity
-            onPress={() => navigate(navigationStrings.PRESCRIPTION)}
-          >
-            <GeneratePrescription />
-          </TouchableOpacity>
-          <View style={styles.typeAndSendMessageContainer}>
-            <TextInput
-              placeholder='Type a Message'
-              multiline={true}
-              placeholderTextColor={Colors.MESSAGE_TIME}
-              style={styles.inputStyle}
-              onChangeText={(text: any) => setMessageBody(text)}
-              value={messageBody}
+
+        <View style={{ flex: 1 }}>
+          {/* Scrollable messages */}
+          <View style={{ paddingHorizontal: 20, flex: 1 }}>
+            <FlatList
+              style={styles.flatList}
+              showsVerticalScrollIndicator={false}
+              data={messagesList}
+              key={"_"}
+              inverted={true}
+              renderItem={({ item }: any) => {
+                return (
+                  <Message
+                    isAttachment={item.isAttachment}
+                    time={item.time}
+                    sentBy={item.sentBy}
+                    messageValue={item.text}
+                    messageId={item.id}
+                    seen={item.seen}
+                    patientSerialNumber={patientSerialNumber}
+                  />
+                );
+              }}
             />
+          </View>
+
+          {/* Fixed bottom input bar */}
+          <View style={[styles.mainBottomView]}>
             <TouchableOpacity
-              onPress={sendMessage}
-              style={[styles.sendMessageButton]}
+              onPress={() => navigate(navigationStrings.PRESCRIPTION)}
             >
-              <SendMessage />
+              <GeneratePrescription />
             </TouchableOpacity>
+            <View style={styles.typeAndSendMessageContainer}>
+              <TextInput
+                placeholder='Type a Message'
+                multiline={true}
+                placeholderTextColor={Colors.MESSAGE_TIME}
+                style={styles.inputStyle}
+                onChangeText={(text: any) => setMessageBody(text)}
+                value={messageBody}
+              />
+              <TouchableOpacity
+                onPress={sendMessage}
+                style={[styles.sendMessageButton]}
+              >
+                <SendMessage />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
-    );
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <Header
-        filledLogo
-        backPress={goBack}
-        title={patientSerialNumber}
-        shadow
-      />
-      {Platform.OS === "ios" ? (
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          {MessageComponent()}
-        </KeyboardAvoidingView>
-      ) : (
-        MessageComponent()
-      )}
     </SafeAreaView>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -423,7 +418,6 @@ const styles = StyleSheet.create({
   sendMessageButton: {
     position: "absolute",
     right: 15,
-    bottom: 16,
   },
   downloadSurveyReport: {
     width: "100%",

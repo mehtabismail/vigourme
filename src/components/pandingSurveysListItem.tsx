@@ -47,7 +47,7 @@ const PandingSurveysListItem = (props: any) => {
         ""
       );
       if (data) {
-        await DownloadSurveyInPDF(
+        DownloadSurveyInPDF(
           chatItem?.recentMessage?.patientSerialNumber,
           data?.file,
           Toast,

@@ -1,4 +1,4 @@
-import RNFetchBlob from "rn-fetch-blob";
+import RNFetchBlob from 'react-native-blob-util';
 
 const DownloadSurveyInPDF = (
   patientId: any,

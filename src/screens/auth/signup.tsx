@@ -8,6 +8,8 @@ import {
   Dimensions,
   ImageBackground,
   Alert,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Colors from '../../common/colors';
 import StatusBarComponent from '../../components/statusbar';
@@ -20,7 +22,6 @@ import GenderDropdown from '../../components/genderDropdown';
 import DatePicker from 'react-native-date-picker';
 import { getReadableDate } from '../../utils/DatePraser';
 import { RFValue } from 'react-native-responsive-fontsize';
-import BlurViewCommon from '../../components/BlurViewCommon';
 import { apiRequest } from '../../api/apiRequest';
 import EndPoint from '../../common/apiEndpoints';
 import Config from 'react-native-config';
@@ -44,7 +45,6 @@ const Signup = (props: any) => {
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [blurView, setBlurView] = useState(true);
   const [userCredentails, setUserCredentials] = useState({
     name: '',
     email: '',
@@ -76,6 +76,7 @@ const Signup = (props: any) => {
   };
 
   const googleSignUpProceed = async () => {
+    setIsLoading(true);
     console.log('google signup proceeds');
     setUserCredentials({
       ...userCredentails,
@@ -95,7 +96,7 @@ const Signup = (props: any) => {
   };
   const dispatch = useDispatch();
 
-    const signin = async () => {
+  const signin = async () => {
     const reqObj = {
       email: userCredentails?.email,
       password: userCredentails?.password,
@@ -123,12 +124,11 @@ const Signup = (props: any) => {
         const fcmToken = await getFcmToken();
         fcmToken
           ? sendFcmToFirestore(
-              fcmToken,
-              data?.user?.isConsultant ? data.doctorId : data.user.id,
-            )
+            fcmToken,
+            data?.user?.isConsultant ? data.doctorId : data.user.id,
+          )
           : console.log('FCM Token Error: ', fcmToken);
 
-        setBlurView(false);
         dispatch(setToken(data.token));
         if (data?.user?.isConsultant) {
           console.log(data?.user, 'checking consultant');
@@ -158,14 +158,14 @@ const Signup = (props: any) => {
       Toast.show(error.toString());
     }
   };
-  
+
   const signup = async (_userCredentails: any) => {
+    setIsLoading(true);
     const localUserCredentails = _userCredentails?.googleLogin
       ? _userCredentails
       : userCredentails;
     const selected_gender = await AsyncStorage.getItem('gender');
     console.log('proceeding');
-    setIsLoading(true);
     try {
       let formData = {
         name: localUserCredentails.name,
@@ -214,7 +214,6 @@ const Signup = (props: any) => {
       console.log(error);
       Toast.show(error);
     } finally {
-      setBlurView(false);
       setIsLoading(false);
     }
   };
@@ -235,7 +234,7 @@ const Signup = (props: any) => {
       // console.log(googleDetails, "proceeding");
       googleSignUpProceed();
     }
-    return () => {};
+    return () => { };
   }, [googleDetails]);
 
   const UnderHeadingText = (props: any) => {
@@ -248,9 +247,7 @@ const Signup = (props: any) => {
     );
   };
 
-  return isLoading ? (
-    <FullScreenLoadingIndicator />
-  ) : (
+  return (
     <SafeAreaView style={styles.container}>
       <StatusBarComponent />
       <Header backPress={goBack} showLogo />
@@ -263,8 +260,8 @@ const Signup = (props: any) => {
           showsVerticalScrollIndicator={false}
           style={{ paddingHorizontal: 20 }}
         >
+
           <View style={styles.signupCOntainer}>
-            {blurView ? <BlurViewCommon /> : <></>}
 
             <View style={{ zIndex: 2 }}>
               <HeadingWithTitle
@@ -358,28 +355,36 @@ const Signup = (props: any) => {
                 />
               )}
 
-              <Button
-                onPress={signup}
-                title={
-                  userCredentails.googleLogin
-                    ? 'Signing up with google'
-                    : 'Sign Up'
-                }
-              />
-            </View>
-            <View style={{ marginVertical: 15, alignItems: 'center' }}>
-              <Text style={styles.text}>Or sign up via</Text>
-            </View>
-            <View>
-              <GoogleButton
-                text="Sign up"
-                setGoogleDetails={setGoogleDetails}
-              />
+              {isLoading ? <View style={{ marginVertical: 20, height: '36%', justifyContent: 'center' }}><ActivityIndicator
+                color={props.colors ? props.colors : Colors.WHITE}
+                size={'large'}
+              /></View> :
+                <View style={{ height: '36%' }}>
+                  <Button
+                    onPress={signup}
+                    title={
+                      userCredentails.googleLogin
+                        ? 'Signing up with google'
+                        : 'Sign Up'
+                    }
+                  />
+
+                  <View style={{ marginVertical: 15, alignItems: 'center' }}>
+                    <Text style={styles.text}>Or sign up via</Text>
+                  </View>
+                  <View>
+                    <GoogleButton
+                      text="Sign up"
+                      setGoogleDetails={setGoogleDetails}
+                    />
+                  </View>
+                </View>}
             </View>
             {/* <View style={{ marginVertical: 15 }}>
                   <FacebookButton text="Sign up" />
                 </View> */}
           </View>
+
           <View style={styles.bottomView}>
             <Text style={styles.bottomText}>Already have an account?</Text>
             <TouchableOpacity
@@ -391,8 +396,7 @@ const Signup = (props: any) => {
           </View>
         </ScrollView>
       </ImageBackground>
-    </SafeAreaView>
-  );
+    </SafeAreaView>)
 };
 
 const styles = StyleSheet.create({
@@ -427,6 +431,8 @@ const styles = StyleSheet.create({
     // paddingVertical: '10%',
     paddingBottom: '7%',
     marginVertical: '15%',
+    backgroundColor:
+      Platform.OS == "ios" ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)",
   },
   signUptext: {
     color: Colors.WHITE,
