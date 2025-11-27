@@ -18,13 +18,9 @@ import HeadingWithTitle from '../../components/headingWithTitle';
 import Input from '../../components/Inputs';
 import Button from '../../components/button';
 import navigationStrings from '../../common/navigationStrings';
-import GenderDropdown from '../../components/genderDropdown';
-import DatePicker from 'react-native-date-picker';
-import { getReadableDate } from '../../utils/DatePraser';
 import { RFValue } from 'react-native-responsive-fontsize';
 import { apiRequest } from '../../api/apiRequest';
 import EndPoint from '../../common/apiEndpoints';
-import Config from 'react-native-config';
 import Toast from 'react-native-simple-toast';
 import GoogleButton from '../../components/GoogleButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -35,15 +31,11 @@ import { sendFcmToFirestore } from '../../utils/fcmApi';
 import { setRole } from '../../redux/slices/authSlice';
 import { CommonActions } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import FullScreenLoadingIndicator from '../../components/fullScreenLoadingIndicator';
+import useGetReduxState from '../../customhooks/useGetReduxState';
 
 const Signup = (props: any) => {
   const { navigation, route } = props;
-  const [genderDropdownVisibility, setGenderDropdownVisibility] =
-    useState(false);
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [date, setDate] = useState(new Date());
-  const [open, setOpen] = useState(false);
+  const states: any = useGetReduxState();
   const [isLoading, setIsLoading] = useState(false);
   const [userCredentails, setUserCredentials] = useState({
     name: '',
@@ -52,14 +44,15 @@ const Signup = (props: any) => {
     dob: '',
     phoneNumber: '',
     password: '',
+    googleLogin: false,
+    facebookLogin: false,
   });
   const [googleCredentials, setGoogleCredentials] = useState({
     facebookLogin: false,
     googleLogin: true,
   });
-  const [signedUpData, setSignedUpData] = useState(null);
 
-  const [googleDetails, setGoogleDetails] = useState(null);
+  const [googleDetails, setGoogleDetails] = useState<any>(null);
   const navigateToSignin = () => {
     // navigation.replace(navigationStrings.SIGN_IN);
     navigation.goBack();
@@ -96,66 +89,56 @@ const Signup = (props: any) => {
   };
   const dispatch = useDispatch();
 
-  const signin = async () => {
-    const reqObj = {
-      email: userCredentails?.email,
-      password: userCredentails?.password,
-    };
+  const signin = async (data: any) => {
     try {
-      const { data }: any = await apiRequest(EndPoint.SIGN_IN, 'post', reqObj);
+      await AsyncStorage.setItem('token', data.token);
+      await AsyncStorage.setItem('userId', data.userId);
+      await AsyncStorage.setItem('doctorId', data.doctorId);
+      await AsyncStorage.setItem('name', data.users.name);
+      (await AsyncStorage.getItem('showOneTimeToast')) === null &&
+        (await AsyncStorage.setItem('showOneTimeToast', 'true'));
+      data?.user?.serialNumber &&
+        (await AsyncStorage.setItem(
+          'serialNumber',
+          data?.user?.serialNumber,
+        ));
 
-      if (data?.success) {
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('userId', data.user.id);
-        await AsyncStorage.setItem('doctorId', data.doctorId);
-        await AsyncStorage.setItem('name', data.user.name);
-        (await AsyncStorage.getItem('showOneTimeToast')) === null &&
-          (await AsyncStorage.setItem('showOneTimeToast', 'true'));
-        data?.user?.serialNumber &&
-          (await AsyncStorage.setItem(
-            'serialNumber',
-            data?.user?.serialNumber,
-          ));
+      await AsyncStorage.setItem('userEmail', '');
+      await AsyncStorage.setItem('userPassword', '');
 
-        await AsyncStorage.setItem('userEmail', '');
-        await AsyncStorage.setItem('userPassword', '');
+      // add fcm token in users collection
+      const fcmToken = await getFcmToken();
+      fcmToken
+        ? sendFcmToFirestore(
+          fcmToken,
+          data?.user?.isConsultant ? data.doctorId : data.userId,
+        )
+        : console.log('FCM Token Error: ', fcmToken);
 
-        // add fcm token in users collection
-        const fcmToken = await getFcmToken();
-        fcmToken
-          ? sendFcmToFirestore(
-            fcmToken,
-            data?.user?.isConsultant ? data.doctorId : data.user.id,
-          )
-          : console.log('FCM Token Error: ', fcmToken);
-
-        dispatch(setToken(data.token));
-        if (data?.user?.isConsultant) {
-          console.log(data?.user, 'checking consultant');
-          dispatch(setRole('consultant'));
-          await AsyncStorage.setItem('role', 'consultant');
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [{ name: navigationStrings.DOCTORS_NAVIGATOR }],
-            }),
-          );
-        } else {
-          dispatch(setRole('patient'));
-          await AsyncStorage.setItem('role', 'patient');
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [{ name: navigationStrings.PATIENT_NAVIGATOR }],
-            }),
-          );
-        }
+      dispatch(setToken(data.token));
+      if (data?.user?.isConsultant) {
+        console.log(data?.user, 'checking consultant');
+        dispatch(setRole('consultant'));
+        await AsyncStorage.setItem('role', 'consultant');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: navigationStrings.DOCTORS_NAVIGATOR }],
+          }),
+        );
       } else {
-        data.message && Toast.show(data.message.toString());
-        console.log('\n\n: , ', data);
+        dispatch(setRole('patient'));
+        await AsyncStorage.setItem('role', 'patient');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: navigationStrings.PATIENT_NAVIGATOR }],
+          }),
+        );
       }
     } catch (error: any) {
-      Toast.show(error.toString());
+      Toast.show(error.toString(), Toast.LONG);
+      console.log(error, 'error in signin after signup');
     }
   };
 
@@ -196,23 +179,28 @@ const Signup = (props: any) => {
       );
       dispatch(setToken(response?.data?.token));
       const { data, status } = response;
-      await AsyncStorage.setItem('userId', data?.userId);
-      console.log(status, 'checking status');
       if (status == 200) {
-        setSignedUpData(data);
-        console.log(route?.params, 'checking params ');
+        const finalAnswer = states.surveyAnswerSlice.finalAnswer;
+        console.log(data, 'checking responce data ');
+        await AsyncStorage.setItem('userId', data?.userId);
         await route?.params?.submitSurveyCallback({
           token: data?.token,
           userId: data?.userId,
           serialNumber: data?.users?.serialNumber,
+          answers: finalAnswer
         });
-        successSignUpModal();
+
+        // successSignUpModal();
+        await signin(data);
+      } else {
+        data.message && Toast.show(data.message.toString(), Toast.LONG);
+        console.log('\n\n: , ', data);
       }
 
-      Toast.show(data.message);
+      Toast.show(data.message, Toast.LONG);
     } catch (error: any) {
       console.log(error);
-      Toast.show(error);
+      Toast.show(error, Toast.LONG);
     } finally {
       setIsLoading(false);
     }
@@ -370,7 +358,7 @@ const Signup = (props: any) => {
                   />
 
                   <View style={{ marginVertical: 15, alignItems: 'center' }}>
-                    <Text style={styles.text}>Or sign up via</Text>
+                    <Text style={styles.signUptext}>Or sign up via</Text>
                   </View>
                   <View>
                     <GoogleButton

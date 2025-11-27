@@ -2,7 +2,8 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import AuthNavigator from './src/navigations/auth';
 import { Provider } from 'react-redux';
-import store from './src/redux/store';
+import store, { persistor } from './src/redux/store';
+import { PersistGate } from 'redux-persist/integration/react';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 
@@ -218,9 +219,11 @@ const App = () => {
   };
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </PersistGate>
     </Provider>
   );
 };

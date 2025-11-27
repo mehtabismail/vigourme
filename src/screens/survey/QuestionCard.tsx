@@ -3,7 +3,6 @@ import {
   Text,
   View,
   ScrollView,
-  TouchableOpacity,
   TextInput,
   Platform,
   Alert,
@@ -18,24 +17,18 @@ import SingleOption from '../../components/singleOption';
 import QuestionBtn from '../../components/questionButton';
 import Colors from '../../common/colors';
 import navigationStrings from '../../common/navigationStrings';
-import { CommonActions, StackActions } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiRequest } from '../../api/apiRequest';
-import EndPoint from '../../common/apiEndpoints';
-import { apiRequestSubmit } from '../../api/apiRequestSubmit';
 import Toast from 'react-native-simple-toast';
-import firestore from '@react-native-firebase/firestore';
 import { useDispatch } from 'react-redux';
 import useGetReduxState from '../../customhooks/useGetReduxState';
 import {
   incrementCurrentIndex,
-  setCurrentQuestion,
   setQuestionLength,
 } from '../../redux/slices/currentQuestionSlice';
 import { setFinalAnswer } from '../../redux/slices/surveyAnswerSlice';
 import SuccessDialogue from '../../components/successDialogue';
-import { getReceiverFcmToken, sendNotification } from '../../utils/fcmApi';
-import RNRestart from 'react-native-restart';
+import { submitSurveyCallback } from '../../utils/submitSurvey';
 
 const QuestionCard = (props: any) => {
   const dispatch = useDispatch();
@@ -53,7 +46,6 @@ const QuestionCard = (props: any) => {
   } = props;
   const currIndex = states.currentQuestionSlice.currentIndex;
   const questionLength = states.currentQuestionSlice.questionsLength;
-  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [selectedOption, setSelectedOption] = useState<any>({});
   const [descriptiveAnswer, setDescriptiveAnswer] = useState<any>();
   const [modalVisible, setModalVisible] = useState(false);
@@ -70,10 +62,6 @@ const QuestionCard = (props: any) => {
     questions && currIndex >= 0 && questions[currIndex].question;
   const currentQuestionForSurvey =
     currentQuestion && currentQuestion.replace('((', '').replace('))', '');
-
-  const navigate = (path: String) => {
-    navigation.navigate(path);
-  };
 
   const isOptionSelected = (value: Object) => {
     return Object.keys(value).length > 0;
@@ -106,17 +94,17 @@ const QuestionCard = (props: any) => {
         null,
         gender == 'male'
           ? {
-              '0': 'maleErectileDysfunctionQuestions',
-              '1': 'malePrematureEjaculationQuestions',
-              '2': 'maleOtherIssues',
-            }
+            '0': 'maleErectileDysfunctionQuestions',
+            '1': 'malePrematureEjaculationQuestions',
+            '2': 'maleOtherIssues',
+          }
           : {
-              '0': 'lowLobido',
-              '1': 'vaginalDryness',
-              '2': 'orgasmIssues',
-              '3': 'vaginismus',
-              '4': 'femaleOtherIssues',
-            },
+            '0': 'lowLobido',
+            '1': 'vaginalDryness',
+            '2': 'orgasmIssues',
+            '3': 'vaginismus',
+            '4': 'femaleOtherIssues',
+          },
       );
     }
   };
@@ -151,7 +139,7 @@ const QuestionCard = (props: any) => {
         setQuestions(_questions);
       } catch (e) {
         console.log('nextQuestionnaire Error: ', e);
-        Toast.show('Error in next questionnaire');
+        Toast.show('Error in next questionnaire', Toast.LONG);
       }
     }
 
@@ -159,7 +147,7 @@ const QuestionCard = (props: any) => {
       isSkipAble?.onSelected && Array.isArray(isSkipAble?.onSelected)
         ? isSkipAble?.onSelected
         : _questions[currIndex].answers &&
-          _questions[currIndex].answers[isSkipAble?.onSelected];
+        _questions[currIndex].answers[isSkipAble?.onSelected];
     const isNextTo =
       (!Array.isArray(expectedAnswer) &&
         expectedAnswer === Object.values(ans)[0]) ||
@@ -168,7 +156,7 @@ const QuestionCard = (props: any) => {
           return (
             accumulator ||
             _questions[currIndex].answers[currentValue] ===
-              Object.values(ans)[0]
+            Object.values(ans)[0]
           );
         }, _questions[currIndex].answers[expectedAnswer[0]] === Object.values(ans)[0]));
 
@@ -186,8 +174,8 @@ const QuestionCard = (props: any) => {
           answer: descriptiveAnswer
             ? descriptiveAnswer
             : isMultiAnswer
-            ? Object.values(ans)
-            : Object.values(ans)[0],
+              ? Object.values(ans)
+              : Object.values(ans)[0],
         },
       ]),
     );
@@ -202,106 +190,7 @@ const QuestionCard = (props: any) => {
     moveToNext(nextTo);
   };
 
-  const registerChatsCollection = async ({ message, serialNumber }: any) => {
-    // const registerChatsCollection = async () => {
-    // const userId = await AsyncStorage.getItem("userId");
-    const userId = await AsyncStorage.getItem('userId');
-    // let currentDateTime = new Date();
-    let currentDateTime = firestore.FieldValue.serverTimestamp();
-    const doctorId = await AsyncStorage.getItem('doctorId');
-    const chatRef = firestore().collection('chats').doc();
-    const messageRef = firestore().collection('messages').doc();
-    const name = await AsyncStorage.getItem('name');
-    const batch = firestore().batch();
-
-    console.log(
-      {
-        isPending: true,
-        patientId: userId,
-        doctorId: doctorId,
-        createdAt: currentDateTime,
-        updatedAt: currentDateTime,
-        recentMessage: {
-          text: null,
-          patientId: userId,
-          doctorId: doctorId,
-          time: currentDateTime,
-          sentBy: userId,
-          name: name,
-          isAttachment: false,
-          patientSerialNumber: serialNumber,
-        },
-        seen: false,
-      },
-      'question card data',
-    );
-
-    batch.set(chatRef, {
-      isPending: true,
-      patientId: userId,
-      doctorId: doctorId,
-      createdAt: currentDateTime,
-      updatedAt: currentDateTime,
-      recentMessage: {
-        text: null,
-        patientId: userId,
-        doctorId: doctorId,
-        time: currentDateTime,
-        sentBy: userId,
-        name: name,
-        isAttachment: false,
-        patientSerialNumber: serialNumber,
-      },
-      seen: false,
-    });
-    // batch.set(messageRef, {
-    //   chatId: chatRef.id,
-    //   text: "Hi Doctor,I have filled and submitted my questionnaire. Kindly prescribe me the medication.",
-    //   patientId: userId,
-    //   doctorId: doctorId,
-    //   time: currentDateTime,
-    //   sentBy: userId,
-    //   isAttachment: false,
-    //   seen: false,
-    //   patientSerialNumber: serialNumber
-    // });
-    try {
-      batch.commit().then(() => {
-        const _sendNotification = (_fcmToken: any) => {
-          _fcmToken &&
-            sendNotification(
-              {
-                fcmToken: _fcmToken,
-                notification: {
-                  body: `A new questionnaire is submitted ${
-                    serialNumber ? 'by ' + serialNumber : ''
-                  }`,
-                  title: 'New Questionnaire',
-                },
-              },
-              () => {},
-            );
-        };
-        // get receiver fcmToken for notification and send notification
-        getReceiverFcmToken(doctorId, _sendNotification);
-      });
-      // navigate(navigationStrings.CHAT);
-      setLoadingSubmit(false);
-      setModalVisible(true);
-      if (message) {
-        // Toast.show(message);
-        // console.log("resetting appp");
-        // RNRestart.restart();
-      }
-    } catch (error) {
-      setLoadingSubmit(false);
-      console.log(error, 'error in batch commiting');
-    }
-  };
-
-  const submitSurveyCallback = async ({ token, userId, serialNumber }: any) => {
-    console.log('calling callback function submitSurveyCallback');
-    setLoadingSubmit(true);
+  const submitSurvey = async () => {
     dispatch(
       setFinalAnswer([
         ...finalAnswer,
@@ -311,63 +200,11 @@ const QuestionCard = (props: any) => {
           answer: descriptiveAnswer
             ? descriptiveAnswer
             : isMultiAnswer
-            ? Object.values(selectedOption)
-            : Object.values(selectedOption)[0],
+              ? Object.values(selectedOption)
+              : Object.values(selectedOption)[0],
         },
       ]),
     );
-    const answers = [
-      ...finalAnswer,
-      {
-        priority: currIndex,
-        question: currentQuestionForSurvey,
-        answer: descriptiveAnswer
-          ? descriptiveAnswer
-          : isMultiAnswer
-          ? Object.values(selectedOption)
-          : Object.values(selectedOption)[0],
-      },
-    ];
-    // const userId = await AsyncStorage.getItem("userId");
-    try {
-      console.log(
-        'started calling submit survey function with userId ',
-        userId,
-      );
-      const res = await apiRequestSubmit(EndPoint.SUBMIT_SURVEY, 'post', {
-        questionsAnswers: answers,
-        userId: userId,
-      }).then(response => console.log(response, 'here is the response '));
-
-      console.log(res, 'success response of question submit');
-
-      registerChatsCollection({
-        message: res?.data.message,
-        serialNumber: serialNumber,
-      });
-    } catch (error: any) {
-      console.log('errorr in catch ...', error);
-      setLoadingSubmit(false);
-      const userId = await AsyncStorage.getItem('userId');
-      const userRes = await firestore()
-        .collection('users')
-        .doc(userId?.toString())
-        .get();
-
-      const chatRes = await firestore()
-        .collection('chats')
-        .where('patientId', '==', userId)
-        .limit(1)
-        .get();
-      if (userRes?.data()?.submittedSurvey && chatRes?.docs[0] === undefined) {
-        registerChatsCollection();
-      } else {
-        Toast.show(error);
-      }
-    }
-  };
-
-  const submitSurvey = async () => {
     Alert.alert(
       'Thanks for completing the survey!',
       'Sign up to get personalized advice and support from our experts. Your info stays private and confidential.',
@@ -462,9 +299,9 @@ const QuestionCard = (props: any) => {
                         if (selectedOption[`${index}`] === undefined) {
                           isMultiAnswer
                             ? setSelectedOption({
-                                ...selectedOption,
-                                [index]: item,
-                              })
+                              ...selectedOption,
+                              [index]: item,
+                            })
                             : setSelectedOption({ [index]: item });
                         } else {
                           isMultiAnswer &&
@@ -511,10 +348,8 @@ const QuestionCard = (props: any) => {
               disabled={
                 (!isOptionSelected(selectedOption) &&
                   !descriptiveAnswer &&
-                  !skipLastQuestion) ||
-                loadingSubmit
+                  !skipLastQuestion)
               }
-              loading={loadingSubmit}
             />
           </View>
         ) : (

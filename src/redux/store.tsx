@@ -1,8 +1,10 @@
 import {
   configureStore,
   createSlice,
-  getDefaultMiddleware,
+  combineReducers,
 } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import authSlice from "./slices/authSlice";
 import loadingSlice from "./slices/loadingSlice";
 import tokenSlice from "./slices/tokenSlice";
@@ -11,21 +13,33 @@ import surveyAnswerSlice from "./slices/surveyAnswerSlice";
 import navigationSlice from "./slices/navigationSlice";
 import medicineSlice from "./slices/medicineSlice";
 
+const rootReducer = combineReducers({
+  authSlice: authSlice,
+  loadingSlice: loadingSlice,
+  tokenSlice: tokenSlice,
+  navigationSlice: navigationSlice,
+  currentQuestionSlice: currentQuestionSlice,
+  surveyAnswerSlice: surveyAnswerSlice,
+  medicines: medicineSlice,
+});
+
+const persistConfig = {
+  key: "root",
+  storage: AsyncStorage,
+  whitelist: ["surveyAnswerSlice"], // Only persist surveyAnswerSlice
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 const store = configureStore({
-  reducer: {
-    authSlice: authSlice,
-    loadingSlice: loadingSlice,
-    tokenSlice: tokenSlice,
-    navigationSlice: navigationSlice,
-    currentQuestionSlice: currentQuestionSlice,
-    surveyAnswerSlice: surveyAnswerSlice,
-    medicines: medicineSlice,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     }),
 });
+
+export const persistor = persistStore(store);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

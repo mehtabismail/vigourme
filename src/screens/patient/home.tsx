@@ -32,9 +32,9 @@ import Toast from "react-native-simple-toast";
 import FullScreenLoadingIndicator from "../../components/fullScreenLoadingIndicator";
 import { useSelector } from "react-redux";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { submitSurveyCallback } from "../../utils/submitSurvey";
 
 export default function Home(props: any) {
-  const [submittedSurvey, setSubmittedSurvey] = useState(null);
   const [unseenMessage, setUnseenMessage] = useState<any>([]);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -42,6 +42,7 @@ export default function Home(props: any) {
   const [gender, setGender] = useState<any>(null);
 
   const { token } = useSelector((state: any) => state?.tokenSlice);
+  const { finalAnswer } = useSelector((state: any) => state?.surveyAnswerSlice);
 
   const checkSubmittedSurvey = (patientId: any) => {
     firestore()
@@ -49,9 +50,22 @@ export default function Home(props: any) {
       .doc(patientId)
       .get()
       .then((row) => {
-        setSubmittedSurvey(row?.data()?.submittedSurvey);
+        row?.data()?.submittedSurvey ? null : AsyncStorage.getItem("serialNumber").then((serialNumber) => {
+          if (!finalAnswer.length) {
+            Toast.show("Please just fill your survey again", Toast.LONG);
+            return;
+          } else {
+            Toast.show("Submitting your answers...", Toast.LONG);
+            submitSurveyCallback({
+              token: token,
+              userId: patientId,
+              serialNumber: serialNumber,
+              answers: finalAnswer
+            });
+          }
+        });
         setBtnText(
-          row?.data()?.submittedSurvey ? "Doctor Review" : "Start Conversation"
+          row?.data()?.surveyApproved ? "Doctor Review" : "Start Conversation"
         );
       });
   };
@@ -200,11 +214,7 @@ export default function Home(props: any) {
             unseenMessageExists={unseenMessage.length ? true : false}
             navigation={navigation}
             text={btnText}
-            navigationPath={
-              submittedSurvey
-                ? navigationStrings.CHAT
-                : navigationStrings.SURVEY_INTRO
-            }
+            navigationPath={navigationStrings.CHAT}
           />
         </View>
       </ScrollView>
